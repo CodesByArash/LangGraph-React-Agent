@@ -15,6 +15,6 @@ class InputState:
         default_factory=list
     )
 
-class State(InputState):
+class AgentState(InputState):
     is_last_step: IsLastStep = field(default=False)
 
