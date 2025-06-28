@@ -7,14 +7,9 @@ from langchain_core.messages import AnyMessage
 from langgraph.graph import add_messages
 from langgraph.managed import IsLastStep
 from typing_extensions import Annotated
+from typing import TypedDict, List
 
 
-@dataclass
-class InputState:
-        messages: Annotated[Sequence[AnyMessage], add_messages] = field(
-        default_factory=list
-    )
 
-class AgentState(InputState):
-    is_last_step: IsLastStep = field(default=False)
-
+class AgentState(TypedDict):
+    messages: Annotated[List[AnyMessage], add_messages]

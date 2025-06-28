@@ -19,13 +19,9 @@ def weather_tool(city: str) -> str:
 
         Output:
             - A string describing the current weather conditions, temperature, humidity, and wind speed in the given city.
-
-        Example:
-            Input: {"city": "Tehran"}
-            Output: "The weather in Tehran is clear with a temperature of 28°C, humidity at 40%, and wind speed of 12 km/h."
     """
 
-    api_key = settings.open_weather_api_key
+    api_key = settings.OPEN_WEATHER_API_KEY
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
     response = requests.get(url)
     data = response.json()
@@ -114,13 +110,12 @@ def calculator_tool(expression: str) -> str:
 from langchain.tools import tool
 
 @tool
-def store_file_tool(key: str, value: str, filename: str = "memory_store.txt") -> str:
+def store_file_tool(text: str, filename: str = "memory_store.txt") -> str:
     """
     Stores a key-value pair as a new line in a file in the format: key:value
 
     Args:
-        key (str): The key to store.
-        value (str): The value to store.
+        text (str): The value to store.
         filename (str, optional): File name to store data. Defaults to "memory_store.txt".
 
     Returns:
@@ -128,8 +123,8 @@ def store_file_tool(key: str, value: str, filename: str = "memory_store.txt") ->
     """
     try:
         with open(filename, "a", encoding="utf-8") as f:
-            f.write(f"{key}:{value}\n")
-        return f"Data stored under key '{key}' in file '{filename}'."
+            f.write(f"{text}\n")
+        return f"Data stored in file '{filename}'."
     except Exception as e:
         return f"Error storing data: {e}"
 
@@ -152,22 +147,29 @@ def read_file_tool(filename: str = "memory_store.txt") -> str:
         return f"Error reading file: {e}"
 
 @tool
-def search_tool(query: str) -> Optional[dict[str, Any]]:
-    """Search for general web results.
-
-    This function performs a search using the Tavily search engine, which is designed
-    to provide comprehensive, accurate, and trusted results. It's particularly useful
-    for answering questions about current events.
+def tavily_search_tool(query: str) -> Optional[dict[str, Any]]:
+    """Search for general web results using Tavily.
+        Args:
+            query (str): the text that you wanna search the web about it.
+        Returns:
+            Optional[Dict[str, Any]]: The search results dictionary or None if error occurs.
+        
     """
-    wrapped = TavilySearch(max_results=settings.max_search_results)
-    return cast(dict[str, Any], wrapped.ainvoke({"query": query}))
+    try:
+        wrapped = TavilySearch(max_results=settings.MAX_SEARCH_RESULTS)
+        result = wrapped.invoke({"query": query})
 
+    except Exception as e:
+        print(e)
+        
+
+    return cast(dict[str, Any], result)
 
 
 
 def get_tools():    
     __tools_list = [
-        search_tool,        
+        tavily_search_tool,        
         weather_tool,            
         derivative_tool,         
         integral_tool,           
